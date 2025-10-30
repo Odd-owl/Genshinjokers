@@ -1,0 +1,17 @@
+{
+	"id": "Genshin_jokers",
+	"name": "Genshin Jokers",
+	"display_name": "Genshin",
+	"author": ["odd_owl722"],
+	"description": "Adds some genshin character-based jokers to the game",
+	"prefix": "Genshin",
+	"main_file": "Main.lua",
+	"priority": 0,
+	"badge_colour": "",
+	"badge_text_colour": "",
+	"version": "1.0.0",
+	"dependencies": [
+        "Steamodded (>=1.*)",
+		"Lovely (>=0.6)"
+    ]
+}
