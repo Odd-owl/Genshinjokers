@@ -749,3 +749,15 @@ SMODS.Joker{
 
 --Cyrene
 --Gives a ton of mult but only outside of the actual round
+
+--Evernight
+--Creates an Evey every round
+
+--Evey
+--Sell/use this card to halve the blind requirement and lose money
+
+--Navia
+--Destroys played stone cards and gains mult for it
+
+--Kachina?
+--Fills hand with stone cards
