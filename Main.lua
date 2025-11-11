@@ -142,8 +142,8 @@ SMODS.Joker{
         if context.money_changed then
             -- money_amount = to_big(context.money_changed)
             -- if to_big(money_amount) < to_big(0) then
-            if to_big(context.money_changed) < to_big(0) then
-                ease_dollars(lenient_bignum(card.ability.extra.money))
+            if context.money_changed < 0 then
+                ease_dollars(card.ability.extra.money)
                 return {
                     message = "$1",
                     colour = G.C.MONEY,
@@ -614,7 +614,7 @@ SMODS.Joker{
             "For every {C:attention}scoring card{} played, ",
             "this joker gains {X:mult,C:white} X#1# {} Mult for",
             "the {C:attention}final hand{} of the round",
-            "{C:inactive}[currently {X:mult,C:white} X#2# {} Mult]{}"
+            "{C:inactive}(currently {}{X:mult,C:white} X#2# {} {C:inactive}Mult){}"
         }
     },
     
@@ -652,6 +652,44 @@ SMODS.Joker{
         if context.end_of_round then
             card.ability.extra.Xmult = 1
         end
+	end
+}
+
+--Tribbie
+SMODS.Joker{
+    key = 'j_tribbie',
+    loc_txt = {
+        name = "Away we go!",
+        text = {
+            "Gives {C:chips}+#1#{} chips for",
+            "every card in played",
+            "{C:attention}poker hand{}"
+        }
+    },
+    
+    rarity = 1,
+    atlas = 'placeholder',
+    pos = {x = 0, y = 0},
+    cost = 7,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,  
+    allow_duplicates = false,
+
+    config = { extra = {chips = 25} },
+    loc_vars = function(self, info_queue, card)
+        return { vars = {card.ability.extra.chips} }
+    end,
+
+    calculate = function(self, card, context)
+		if context.joker_main then
+            this_hand_chips = card.ability.extra.chips * #context.scoring_hand
+			return{
+                chips = this_hand_chips,
+                card = card
+            }
+		end
 	end
 }
 
@@ -748,16 +786,127 @@ SMODS.Joker{
 }
 
 --Cyrene
---Gives a ton of mult but only outside of the actual round
+SMODS.Joker{
+    key = 'j_Elysia',
+    loc_txt = {
+        name = "It's Elysin' time!",
+        text = {
+            "#1#",
+            "{X:mult,C:white} X#3# {} Mult",
+            "#2#"
+        }
+    },
+    rarity = 3,
+    atlas = 'placeholder',
+    pos = {x = 0, y = 0},
+    cost = 7,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,  
+    allow_duplicates = false,
+    
+    config = { extra = {display_text = "Still charging ult...", display_text2 = "(surely she gets it soon)", Xmult = 1.2, low_Xmult = 1.2, fake_Xmult = 10} },
+    loc_vars = function(self, info_queue, card)
+        return { vars = {card.ability.extra.display_text, card.ability.extra.display_text2, card.ability.extra.Xmult} }
+    end,
+    
+    calculate = function(self, card, context)
+        if context.end_of_round and context.cardarea == G.jokers then
+            card.ability.extra.display_text = "Ult is ready!"
+            card.ability.extra.Xmult = card.ability.extra.fake_Xmult
+            card.ability.extra.display_text2 = "Until the next round starts"
+            return {
+                message = "Ult ready!",
+                colour = G.C.PINK,
+                card = card
+            }
+        end
+
+        if context.setting_blind then
+            card.ability.extra.display_text = "Still charging ult..."
+            card.ability.extra.Xmult = card.ability.extra.low_Xmult
+            card.ability.extra.display_text2 = "(surely she gets it soon)"
+        end
+
+        if context.joker_main then
+            return{
+                Xmult = card.ability.extra.Xmult,
+                card = card
+            }
+        end
+    end
+}
+
+--Cipher
+SMODS.Joker{
+    key = 'j_cipher',
+    loc_txt = {
+        name = "Nothing but a void!",
+        text = {
+            "Stores {X:mult,C:white} X#1# {} Mult every hand",
+            "When in the {C:attention}rightmost position{},",
+            "gives {C:mult}Stored Mult{} and resets",
+            "{C:inactive}(currently {}{X:mult,C:white} X#2# {} {C:inactive}Mult){}"
+        }
+    },
+    
+    rarity = 3,
+    atlas = 'placeholder',
+    pos = {x = 0, y = 0},
+    cost = 6,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,  
+    allow_duplicates = false,
+
+    config = { extra = {Xmult_mod = 0.25, Xmult = 1, used = false} },
+    loc_vars = function(self, info_queue, card)
+        return { vars = {card.ability.extra.Xmult_mod, card.ability.extra.Xmult} }
+    end,
+
+    calculate = function(self, card, context)
+		if context.before and not context.blueprint then
+            card.ability.extra.Xmult = card.ability.extra.Xmult + card.ability.extra.Xmult_mod
+            card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize{type = 'variable', key = 'a_xmult', vars = {card.ability.extra.Xmult}}})		
+		end
+
+		if context.joker_main and G.jokers.cards[#G.jokers.cards] == card then
+            card.ability.extra.used = true
+			return{
+                Xmult = card.ability.extra.Xmult,
+                card = card
+            }
+		end
+
+        if context.after and card.ability.extra.used then
+            card.ability.extra.Xmult = 1
+            card.ability.extra.used = false
+        end
+	end
+}
+
+--Chevreuse
+-- does something if you hand only contains the suits that effie doesn't buff
 
 --Evernight
 --Creates an Evey every round
 
---Evey
---Sell/use this card to halve the blind requirement and lose money
+--Evey/consumable
+--Sell/use this card to reduce the blind requirement and lose money
 
 --Navia
 --Destroys played stone cards and gains mult for it
 
 --Kachina?
---Fills hand with stone cards
+--adds stone card to hand
+
+--anemo
+--on first hand, convert all cards to the same suit as the first card
+
+--???
+--gains stats for every time a card changes suit?
+
+--Cipher
+--Can unload big Xmult when in last joker slot, charges up otherwise
