@@ -342,7 +342,7 @@ SMODS.Joker{
             "{C:inactive}[currently: #2#]{}"
         }
     },
-    rarity = 2,
+    rarity = 3,
     atlas = 'Joker',
     pos = {x = 0, y = 0},
     cost = 6,
@@ -553,7 +553,7 @@ SMODS.Joker{
         }
     },
     
-    rarity = 1,
+    rarity = 2,
     atlas = 'Joker',
     pos = {x = 0, y = 1},
     cost = 5,
@@ -611,7 +611,7 @@ SMODS.Joker{
     loc_txt = {
         name = "Nothing but a void!",
         text = {
-            "For every {C:attention}scoring card{} played, ",
+            "For every {C:attention}scoring card{} played,",
             "this joker gains {X:mult,C:white} X#1# {} Mult for",
             "the {C:attention}final hand{} of the round",
             "{C:inactive}(currently {}{X:mult,C:white} X#2# {} {C:inactive}Mult){}"
@@ -628,7 +628,7 @@ SMODS.Joker{
     discovered = true,  
     allow_duplicates = false,
 
-    config = { extra = {Xmult_mod = 0.2, Xmult = 1} },
+    config = { extra = {Xmult_mod = 0.25, Xmult = 1} },
     loc_vars = function(self, info_queue, card)
         return { vars = {card.ability.extra.Xmult_mod, card.ability.extra.Xmult} }
     end,
@@ -842,11 +842,11 @@ SMODS.Joker{
 SMODS.Joker{
     key = 'j_cipher',
     loc_txt = {
-        name = "Nothing but a void!",
+        name = "Our cute play session is over!",
         text = {
-            "Stores {X:mult,C:white} X#1# {} Mult every hand",
-            "When in the {C:attention}rightmost position{},",
-            "gives {C:mult}Stored Mult{} and resets",
+            "Stores {X:mult,C:white} X#1# {} Mult every hand.",
+            "Gives {C:mult}Stored Mult{} and resets",
+            "when in the {C:attention}rightmost position{},",
             "{C:inactive}(currently {}{X:mult,C:white} X#2# {} {C:inactive}Mult){}"
         }
     },
@@ -861,7 +861,7 @@ SMODS.Joker{
     discovered = true,  
     allow_duplicates = false,
 
-    config = { extra = {Xmult_mod = 0.25, Xmult = 1, used = false} },
+    config = { extra = {Xmult_mod = 0.3, Xmult = 1, used = false} },
     loc_vars = function(self, info_queue, card)
         return { vars = {card.ability.extra.Xmult_mod, card.ability.extra.Xmult} }
     end,
@@ -880,9 +880,114 @@ SMODS.Joker{
             }
 		end
 
+        -- if context.joker_main and G.jokers.cards[#G.jokers.cards] ~= card and not context.blueprint then
+        --     card.ability.extra.Xmult = card.ability.extra.Xmult + card.ability.extra.Xmult_mod
+        --     card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize{type = 'variable', key = 'a_xmult', vars = {card.ability.extra.Xmult}}})
+		-- end
+
         if context.after and card.ability.extra.used then
             card.ability.extra.Xmult = 1
             card.ability.extra.used = false
+        end
+	end
+}
+
+--Navia
+SMODS.Joker{
+    key = 'j_navia',
+    loc_txt = {
+        name = "A proper sendoff!",
+        text = {
+            "Gives {X:mult,C:white} X#1# {} Mult for every",
+            "{C:attention}Stone card{} in the {C:attention}current hand{}.",
+            "Destroys all played {C:attention}Stone cards{}"
+        }
+    },
+    
+    rarity = 3,
+    atlas = 'Joker',
+    pos = {x = 3, y = 1},
+    cost = 7,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,  
+    allow_duplicates = false,
+    
+    config = { extra = {Xmult_mod = 2, Xmult = 2} },
+    loc_vars = function(self, info_queue, card)
+        return { vars = {card.ability.extra.Xmult_mod} }
+    end,
+    
+    calculate = function(self, card, context)
+        if context.individual and context.cardarea == G.play and context.other_card.ability.effect == 'Stone Card' and not context.blueprint then  
+            
+            -- if context.other_card.ability.effect == 'Stone Card' then 
+                -- card.ability.extra.Xmult = card.ability.extra.Xmult + card.ability.extra.Xmult_mod
+                return{
+                    x_mult = card.ability.extra.Xmult,
+                    card = card
+                }
+                -- card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize{type = 'variable', key = 'a_xmult', vars = {card.ability.extra.Xmult}}})
+            -- end
+            
+        end
+
+        if context.destroy_card and (context.cardarea == G.play or context.cardarea == "unscored") and not context.blueprint then
+            if context.destroy_card.ability.effect == 'Stone Card' then
+			    return { remove = not SMODS.is_eternal(context.destroy_card) }
+            end
+		end
+
+        -- if context.joker_main and card.ability.extra.Xmult > 1 then
+        --     return{
+        --         Xmult = card.ability.extra.Xmult,
+        --         card = card
+        --     }
+        -- end
+
+        -- if context.after then
+        --     card.ability.extra.Xmult = 1
+        -- end
+    end
+}
+
+--Kachina
+SMODS.Joker{
+    key = 'j_kachina',
+    loc_txt = {
+        name = "Drilling down!",
+        text = {
+            "Creates and places a",
+            "{C:attention}Stone card{} into every",
+            "{C:attention}played hand{}",
+            "{C:inactive}(Must have room){}"
+        }
+    },
+    
+    rarity = 2,
+    atlas = 'placeholder',
+    pos = {x = 0, y = 0},
+    cost = 6,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,  
+    allow_duplicates = false,
+
+    calculate = function(self, card, context)
+		if context.before and #G.play.cards < 5 then
+            local front = pseudorandom_element(G.P_CARDS, pseudoseed('marb_fr'))
+            G.playing_card = (G.playing_card and G.playing_card + 1) or 1
+            local card = Card(G.play.T.x + G.play.T.w/2, G.play.T.y, G.CARD_W, G.CARD_H, front, G.P_CENTERS.m_stone, {playing_card = G.playing_card})
+            card:start_materialize({G.C.SECONDARY_SET.Enhanced})
+            G.play:emplace(card)
+            table.insert(G.playing_cards, card)
+            
+            return{
+                message = "Crystallize!",
+                card = card
+            }
         end
 	end
 }
@@ -896,17 +1001,8 @@ SMODS.Joker{
 --Evey/consumable
 --Sell/use this card to reduce the blind requirement and lose money
 
---Navia
---Destroys played stone cards and gains mult for it
-
---Kachina?
---adds stone card to hand
-
 --anemo
 --on first hand, convert all cards to the same suit as the first card
 
 --???
 --gains stats for every time a card changes suit?
-
---Cipher
---Can unload big Xmult when in last joker slot, charges up otherwise
