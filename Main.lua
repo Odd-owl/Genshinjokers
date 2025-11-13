@@ -668,8 +668,8 @@ SMODS.Joker{
     },
     
     rarity = 1,
-    atlas = 'placeholder',
-    pos = {x = 0, y = 0},
+    atlas = 'Joker',
+    pos = {x = 6, y = 1},
     cost = 7,
     blueprint_compat = true,
     eternal_compat = true,
@@ -754,8 +754,8 @@ SMODS.Joker{
     },
     
     rarity = 2,
-    atlas = 'placeholder',
-    pos = {x = 0, y = 0},
+    atlas = 'Joker',
+    pos = {x = 5, y = 1},
     cost = 7,
     blueprint_compat = false,
     eternal_compat = true,
@@ -797,8 +797,8 @@ SMODS.Joker{
         }
     },
     rarity = 3,
-    atlas = 'placeholder',
-    pos = {x = 0, y = 0},
+    atlas = 'Joker',
+    pos = {x = 3, y = 2},
     cost = 7,
     blueprint_compat = true,
     eternal_compat = true,
@@ -852,8 +852,8 @@ SMODS.Joker{
     },
     
     rarity = 3,
-    atlas = 'placeholder',
-    pos = {x = 0, y = 0},
+    atlas = 'Joker',
+    pos = {x = 2, y = 2},
     cost = 6,
     blueprint_compat = true,
     eternal_compat = true,
@@ -906,7 +906,7 @@ SMODS.Joker{
     
     rarity = 3,
     atlas = 'Joker',
-    pos = {x = 3, y = 1},
+    pos = {x = 0, y = 2},
     cost = 7,
     blueprint_compat = true,
     eternal_compat = true,
@@ -966,8 +966,8 @@ SMODS.Joker{
     },
     
     rarity = 2,
-    atlas = 'placeholder',
-    pos = {x = 0, y = 0},
+    atlas = 'Joker',
+    pos = {x = 1, y = 2},
     cost = 6,
     blueprint_compat = true,
     eternal_compat = true,
