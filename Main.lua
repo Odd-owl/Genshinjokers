@@ -27,7 +27,7 @@ SMODS.Joker{
             "{C:red}-$#5#{} every hand played",
             "Gains {X:mult,C:white} X#4# {} Mult for every",
             "{C:money}$#1#{} {C:inactive}[#2#]{} gained or lost",
-            "{C:inactive}(Currently {X:mult,C:white} X#3# {}){}"
+            "{C:inactive}(Currently {X:mult,C:white} X#3# {} {C:inactive}Mult){}"
         }
     },
     
@@ -43,7 +43,7 @@ SMODS.Joker{
     
     config = { extra = {req_change = 13, current_count = 0, Xmult = 1, Xmult_inc = 0.1, cost = -2} },
     loc_vars = function(self, info_queue, card)
-        return { vars = {card.ability.extra.req_change, card.ability.extra.current_count, card.ability.extra.Xmult, card.ability.extra.Xmult_inc, card.ability.extra.cost*-1} }
+        return { vars = {card.ability.extra.req_change, card.ability.extra.req_change - card.ability.extra.current_count, card.ability.extra.Xmult, card.ability.extra.Xmult_inc, card.ability.extra.cost*-1} }
     end,
     
     calculate = function(self, card, context)
@@ -81,7 +81,7 @@ SMODS.Joker{
         name = "Settle down!",
         text = {
             "{C:red}-$#2#{} when leaving",
-            "the shop. {C:money}+$#1#{} at",
+            "the shop, {C:money}+$#1#{} at",
             "the end of the round",
         }
     },
@@ -119,7 +119,7 @@ SMODS.Joker{
         name = "Have some sunshine!",
         text = {
             "{C:money}+$#1#{} anytime",
-            "money is lost."
+            "money is lost"
         }
     },
     
@@ -548,7 +548,7 @@ SMODS.Joker{
             "If {C:attention}poker hand{} contains 1/2/3/4/5",
             "{C:hearts}Heart{} or {C:spades}Spade{} cards and does",
             "not contain a {C:attention}Flush{}, this joker",
-            "gains {C:mult}+#1#{}/{C:mult}+#1#{}/{C:mult}+#2#{}/{C:mult}+#2#{}/{C:mult}+#3#{} Mult.",
+            "gains {C:mult}+#1#{}/{C:mult}+#1#{}/{C:mult}+#2#{}/{C:mult}+#2#{}/{C:mult}+#3#{} Mult",
             "{C:inactive}[currently {C:mult}+#4#{} {C:inactive}Mult]"
         }
     },
@@ -700,7 +700,7 @@ SMODS.Joker{
         name = "It's Durin' time!",
         text = {
             "{C:money}+$#1#{} if poker hand is a",
-            "{C:attention}Three of a kind{} or lower.",
+            "{C:attention}Three of a kind{} or lower,",
             "{X:mult,C:white} X#2# {} Mult If poker hand is a",
             "{C:attention}Straight{} or higher"
         }
@@ -747,9 +747,9 @@ SMODS.Joker{
         name = "Return to dust!",
         text = {
             "If you run out hands, gain",
-            "{C:chips}+#1#{} Hand and {C:mult}lose $#3#{}.",
-            "Money lost gets doubled for",
-            "every trigger this round."
+            "{C:chips}+#1#{} Hand and {C:mult}lose $#3#{},",
+            "Cost gets {C:attention}doubled{} for every",
+            "consecutive trigger this round"
         }
     },
     
@@ -774,7 +774,7 @@ SMODS.Joker{
             ease_dollars(to_big(card.ability.extra.cost) * to_big(-1))
             card.ability.extra.cost = card.ability.extra.cost * 2
 			return{
-                message = '-$',
+                message = '-$' .. number_format(card.ability.extra.cost / 2),
                 colour = G.C.MULT
             }
 		end

@@ -1,14 +1,14 @@
 {
 	"id": "Genshin_jokers",
 	"name": "Genshin Jokers",
-	"display_name": "Genshin",
+	"display_name": "Hoyo",
 	"author": ["odd_owl722"],
 	"description": "Adds some genshin character-based jokers to the game",
-	"prefix": "Genshin",
+	"prefix": "Hoyo",
 	"main_file": "Main.lua",
 	"priority": 0,
-	"badge_colour": "",
-	"badge_text_colour": "",
+	"badge_colour": "FFB8DF",
+	"badge_text_colour": "FFFFFF",
 	"version": "1.0.0",
 	"dependencies": [
         "Steamodded (>=1.*)",
