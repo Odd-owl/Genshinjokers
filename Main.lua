@@ -898,8 +898,8 @@ SMODS.Joker{
     loc_txt = {
         name = "A proper sendoff!",
         text = {
-            "Gives {X:mult,C:white} X#1# {} Mult for every",
-            "{C:attention}Stone card{} in the {C:attention}current hand{}.",
+            "Played {C:attention}Stone cards{} give",
+            "{X:mult,C:white} X#1# {} Mult",
             "Destroys all played {C:attention}Stone cards{}"
         }
     },
@@ -992,6 +992,66 @@ SMODS.Joker{
 	end
 }
 
+--Chiori
+SMODS.Joker{
+    key = 'j_chiori',
+    loc_txt = {
+        name = "Next customer!",
+        text = {
+            "If {C:attention}played hand{} contains a",
+            "{C:attention}Stone card{}, retrigger all",
+            "cards in hand"
+        }
+    },
+    
+    rarity = 2,
+    atlas = 'placeholder',
+    pos = {x = 0, y = 0},
+    cost = 6,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,  
+    allow_duplicates = false,
+    
+    config = { extra = {retrigger = -1} },
+    
+    calculate = function(self, card, context)
+        -- if context.before then
+        --     for i = 1, #G.play.cards do
+        --         if G.play.cards[i].ability.effect == 'Stone Card' then 
+        --             card.ability.extra.retrigger = true
+        --         end
+        --     end
+        -- end
+
+        if context.repetition and context.cardarea == G.play then
+            if card.ability.extra.retrigger == -1 then
+                for i = 1, #G.play.cards do
+                    if G.play.cards[i].ability.effect == 'Stone Card' then 
+                        card.ability.extra.retrigger = 1
+                    end
+                end
+                if card.ability.extra.retrigger == -1 then
+                    card.ability.extra.retrigger = 0
+                end
+            end
+
+            if card.ability.extra.retrigger == 1 then
+                return {
+                    message = localize("k_again_ex"),
+                    repetitions = 1,
+                    card = card,
+                }
+            end 
+        end   
+        
+        if context.after and context.cardarea == G.play then
+            card.ability.extra.retrigger = -1
+        end
+    end
+}
+
 --Chevreuse
 -- does something if you hand only contains the suits that effie doesn't buff
 
@@ -1006,3 +1066,6 @@ SMODS.Joker{
 
 --???
 --gains stats for every time a card changes suit?
+
+--Asta?
+--Taco bell?????? speed???? something with decaying stack mechanic?????
