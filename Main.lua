@@ -48,7 +48,7 @@ SMODS.Joker {
 
     calculate = function(self, card, context)
         if context.before then
-            ease_dollars(lenient_bignum(card.ability.extra.cost))
+            ease_dollars(to_big(card.ability.extra.cost))
             card:juice_up(0.3, 0.4)
         end
 
@@ -101,7 +101,7 @@ SMODS.Joker {
     end,
     calculate = function(self, card, context)
         if context.ending_shop and not context.blueprint then
-            ease_dollars(lenient_bignum(card.ability.extra.loss * -1))
+            ease_dollars(card.ability.extra.loss * -1)
             card:juice_up(0.3, 0.4)
         end
     end,
@@ -179,6 +179,7 @@ function reset_castle_card()
         G.GAME.current_round.asta_suit = "Spades"
     end
     G.GAME.current_round.asta_suit = pseudorandom_element({ "Hearts", "Spades", "Diamonds", "Clubs" })
+    -- G.GAME.current_round.asta_suit = pseudorandom_element({ "Hearts", "Spades" })
 end
 
 --Ajaw
@@ -314,8 +315,7 @@ SMODS.Joker {
             end
 
             if suitcount == 2 or (suitcount < 2 and wilds > 0) then
-                card.ability.extra.chips = lenient_bignum(to_big(card.ability.extra.chips) + card.ability.extra
-                    .chips_mod)
+                card.ability.extra.chips = card.ability.extra.chips + card.ability.extra.chips_mod
 
                 card_eval_status_text(card, "extra", nil, nil, nil, {
                     message = localize({
@@ -741,7 +741,7 @@ SMODS.Joker {
 
     calculate = function(self, card, context)
         if context.before and not next(context.poker_hands["Flush"]) and not next(context.poker_hands["Straight"]) and not next(context.poker_hands["Full House"]) and not next(context.poker_hands["Four of a Kind"]) then
-            ease_dollars(lenient_bignum(card.ability.extra.money))
+            ease_dollars(to_big(card.ability.extra.money))
             return {
                 message = "$4",
                 colour = G.C.MONEY,
@@ -1024,7 +1024,7 @@ SMODS.Joker {
     },
 
     rarity = 2,
-    atlas = 'placeholder',
+    atlas = 'Joker',
     pos = { x = 4, y = 2 },
     cost = 6,
     blueprint_compat = true,
