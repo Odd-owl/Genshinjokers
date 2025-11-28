@@ -156,30 +156,22 @@ SMODS.Joker {
 local rcc = reset_castle_card
 function reset_castle_card()
     rcc()
-    --ajaw
-    if not G.GAME.current_round.ajaw_card then
-        G.GAME.current_round.ajaw_card = {}
-    end
-    G.GAME.current_round.ajaw_card.suit = "Spades"
+    G.GAME.current_round.ajaw_suit = "Spades"
+    G.GAME.current_round.asta_suit = "Hearts"
     local valid_castle_cards = {}
     for k, v in ipairs(G.playing_cards) do
         if not SMODS.has_no_suit(v) then
             valid_castle_cards[#valid_castle_cards + 1] = v
         end
     end
+
     if valid_castle_cards[1] then
-        local castle_card = pseudorandom_element(valid_castle_cards)
-        if not G.GAME.current_round.ajaw_card then
-            G.GAME.current_round.ajaw_card = {}
-        end
-        G.GAME.current_round.ajaw_card.suit = castle_card.base.suit
+        local ajaw_card = pseudorandom_element(valid_castle_cards)
+        G.GAME.current_round.ajaw_suit = ajaw_card.base.suit
+
+        local asta_card = pseudorandom_element(valid_castle_cards)
+        G.GAME.current_round.asta_suit = asta_card.base.suit
     end
-    --asta
-    if not G.GAME.current_round.asta_suit then
-        G.GAME.current_round.asta_suit = "Spades"
-    end
-    G.GAME.current_round.asta_suit = pseudorandom_element({ "Hearts", "Spades", "Diamonds", "Clubs" })
-    -- G.GAME.current_round.asta_suit = pseudorandom_element({ "Hearts", "Spades" })
 end
 
 --Ajaw
@@ -190,8 +182,8 @@ SMODS.Joker {
         text = {
             "After discarding {C:attention}#2#{} {C:inactive}[#3#]",
             "{V:1}#1#{} cards, {X:mult,C:white} X#4# {} Mult",
-            "for the next hand. Suit",
-            "and count reset each round"
+            "for the next hand.",
+            "Suit changes each round"
         }
     },
     rarity = 2,
@@ -208,18 +200,18 @@ SMODS.Joker {
     loc_vars = function(self, info_queue, card)
         return {
             vars = {
-                localize(G.GAME.current_round.ajaw_card and G.GAME.current_round.ajaw_card.suit or "Spades",
+                localize(G.GAME.current_round.ajaw_suit or "Spades",
                     "suits_singular"),
                 card.ability.extra.discard_req,
                 card.ability.extra.current_stacks,
                 card.ability.extra.Xmult,
-                colours = { G.C.SUITS[G.GAME.current_round.ajaw_card and G.GAME.current_round.ajaw_card.suit or "Spades"] }
+                colours = { G.C.SUITS[G.GAME.current_round.ajaw_suit or "Spades"] }
             }
         }
     end,
 
     calculate = function(self, card, context)
-        if context.discard and context.other_card:is_suit(G.GAME.current_round.ajaw_card.suit) and not context.blueprint then
+        if context.discard and context.other_card:is_suit(G.GAME.current_round.ajaw_suit) and not context.blueprint then
             local eval = function() return card.ability.extra.current_stacks >= card.ability.extra.discard_req end
             juice_card_until(card, eval, true)
             card.ability.extra.current_stacks = card.ability.extra.current_stacks + 1
@@ -241,10 +233,6 @@ SMODS.Joker {
         end
 
         if context.after and card.ability.extra.current_stacks >= card.ability.extra.discard_req then
-            card.ability.extra.current_stacks = 0
-        end
-
-        if context.end_of_round then
             card.ability.extra.current_stacks = 0
         end
     end
@@ -482,7 +470,6 @@ SMODS.ObjectType({
     cards = {},
     inject = function(self)
         SMODS.ObjectType.inject(self)
-        -- insert base game food jokers
         self:inject_card(G.P_CENTERS.c_world)
         self:inject_card(G.P_CENTERS.c_sun)
         self:inject_card(G.P_CENTERS.c_moon)
@@ -604,14 +591,7 @@ SMODS.Joker {
             end
 
             if cardcount > 0 then
-                card_eval_status_text(card, "extra", nil, nil, nil, {
-                    message = localize({
-                        type = "variable",
-                        key = "a_mult",
-                        vars = { number_format(card.ability.extra.mult) },
-                    }),
-                    colour = G.C.MULT,
-                })
+                card_eval_status_text(card, "extra", nil, nil, nil, { message = localize('k_upgrade_ex') })
             end
         end
 
@@ -918,9 +898,10 @@ SMODS.Joker {
     loc_txt = {
         name = "A proper sendoff!",
         text = {
-            "Played {C:attention}Stone cards{} give",
-            "{X:mult,C:white} X#1# {} Mult",
-            "Destroys all played {C:attention}Stone cards{}"
+            "Gains {X:mult,C:white} X#1# {} Mult every ",
+            "time a {C:attention}Stone card{} is scored.",
+            "Destroys all played {C:attention}Stone cards{}",
+            "{C:inactive}(currently {}{X:mult,C:white} X#2# {} {C:inactive}Mult){}"
         }
     },
 
@@ -934,39 +915,32 @@ SMODS.Joker {
     discovered = true,
     allow_duplicates = false,
 
-    config = { extra = { Xmult_mod = 2, Xmult = 2 } },
+    config = { extra = { Xmult_mod = 0.25, Xmult = 1 } },
     loc_vars = function(self, info_queue, card)
         return { vars = { card.ability.extra.Xmult_mod } }
     end,
 
     calculate = function(self, card, context)
         if context.individual and context.cardarea == G.play and context.other_card.ability.effect == 'Stone Card' and not context.blueprint then
-            -- if context.other_card.ability.effect == 'Stone Card' then
-            -- card.ability.extra.Xmult = card.ability.extra.Xmult + card.ability.extra.Xmult_mod
-            return {
-                x_mult = card.ability.extra.Xmult,
-                card = card
-            }
-            -- card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize{type = 'variable', key = 'a_xmult', vars = {card.ability.extra.Xmult}}})
-            -- end
+            card.ability.extra.Xmult = card.ability.extra.Xmult + card.ability.extra.Xmult_mod
+            card_eval_status_text(card, 'extra', nil, nil, nil, { message = localize('k_upgrade_ex') })
         end
 
         if context.destroy_card and (context.cardarea == G.play or context.cardarea == "unscored") and not context.blueprint then
             if context.destroy_card.ability.effect == 'Stone Card' then
-                return { remove = not SMODS.is_eternal(context.destroy_card) }
+                return {
+                    remove = not SMODS.is_eternal(context.destroy_card),
+                    card = card
+                }
             end
         end
 
-        -- if context.joker_main and card.ability.extra.Xmult > 1 then
-        --     return{
-        --         Xmult = card.ability.extra.Xmult,
-        --         card = card
-        --     }
-        -- end
-
-        -- if context.after then
-        --     card.ability.extra.Xmult = 1
-        -- end
+        if context.joker_main and card.ability.extra.Xmult > 1 then
+            return {
+                Xmult = card.ability.extra.Xmult,
+                card = card
+            }
+        end
     end
 }
 
@@ -994,15 +968,28 @@ SMODS.Joker {
     allow_duplicates = false,
 
     calculate = function(self, card, context)
-        if context.before and #G.play.cards < 5 then
+        if context.press_play and #G.hand.highlighted < 5 then
             local front = pseudorandom_element(G.P_CARDS, pseudoseed('marb_fr'))
             G.playing_card = (G.playing_card and G.playing_card + 1) or 1
             local card = Card(G.play.T.x + G.play.T.w / 2, G.play.T.y, G.CARD_W, G.CARD_H, front, G.P_CENTERS.m_stone,
                 { playing_card = G.playing_card })
-            card:start_materialize({ G.C.SECONDARY_SET.Enhanced })
-            G.play:emplace(card)
-            table.insert(G.playing_cards, card)
 
+
+            table.insert(G.playing_cards, card)
+            G.hand:emplace(card)
+            card:start_materialize()
+
+            card.base.times_played = card.base.times_played + 1
+            card.ability.played_this_ante = true
+            G.GAME.round_scores.cards_played.amt = G.GAME.round_scores.cards_played.amt + 1
+            draw_card(G.hand, G.play, 1, 'up', nil, card)
+
+            G.E_MANAGER:add_event(Event({
+                func = function()
+                    SMODS.calculate_context({ playing_card_added = true, cards = card })
+                    return true
+                end
+            }))
             return {
                 message = "Crystallize!",
                 card = card
@@ -1057,7 +1044,7 @@ SMODS.Joker {
             end
         end
 
-        if context.after and context.cardarea == G.play then
+        if context.after then
             card.ability.extra.retrigger = -1
         end
     end
@@ -1112,13 +1099,7 @@ SMODS.Joker {
                     card.ability.extra.mult = card.ability.extra.mult + card.ability.extra.extra_mult;
                 end
             end
-            card_eval_status_text(card, "extra", nil, nil, nil, {
-                message = localize({
-                    type = "variable",
-                    key = "a_mult",
-                    vars = { number_format(card.ability.extra.mult) },
-                })
-            })
+            card_eval_status_text(card, "extra", nil, nil, nil, { message = localize('k_upgrade_ex') })
         end
 
         if context.joker_main and card.ability.extra.mult > 0 then
@@ -1163,6 +1144,3 @@ SMODS.Joker {
 
 --???
 --gains stats for every time a card changes suit?
-
---Asta?
---Taco bell?????? speed???? something with decaying stack mechanic?????
