@@ -341,7 +341,7 @@ SMODS.Joker {
     rarity = 3,
     atlas = 'Joker',
     pos = { x = 0, y = 0 },
-    cost = 6,
+    cost = 7,
     blueprint_compat = true,
     eternal_compat = true,
     unlocked = true,
@@ -477,11 +477,12 @@ SMODS.ObjectType({
         self:inject_card(G.P_CENTERS.c_lovers)
     end,
 })
---Venti
+
+--Jahoda
 SMODS.Joker {
-    key = 'j_venti',
+    key = 'j_jahoda',
     loc_txt = {
-        name = "Time for takeoff!",
+        name = "(@.@)",
         text = {
             "Randomly creates a {C:attention}Suit changing{}",
             "{C:attention}Tarot{} or {C:attention}The lovers{} if played hand",
@@ -493,7 +494,7 @@ SMODS.Joker {
 
     rarity = 2,
     atlas = 'Joker',
-    pos = { x = 1, y = 1 },
+    pos = { x = 6, y = 2 },
     cost = 7,
     blueprint_compat = true,
     eternal_compat = true,
@@ -551,8 +552,7 @@ SMODS.Joker {
         name = "Goose on the loose!",
         text = {
             "If {C:attention}poker hand{} contains 1/2/3/4/5",
-            "{C:hearts}Heart{} or {C:spades}Spade{} cards and does",
-            "not contain a {C:attention}Flush{}, this joker",
+            "{C:diamonds}Diamond{} or {C:clubs}Club{} cards, this joker",
             "gains {C:mult}+#1#{}/{C:mult}+#1#{}/{C:mult}+#2#{}/{C:mult}+#2#{}/{C:mult}+#3#{} Mult",
             "{C:inactive}[currently {C:mult}+#4#{} {C:inactive}Mult]"
         }
@@ -574,10 +574,10 @@ SMODS.Joker {
     end,
 
     calculate = function(self, card, context)
-        if context.before and not context.blueprint and not next(context.poker_hands["Flush"]) then
+        if context.before and not context.blueprint then
             local cardcount = 0
             for i = 1, #context.scoring_hand do
-                if context.scoring_hand[i].ability.name == 'Wild Card' or context.scoring_hand[i]:is_suit('Spades', true) or context.scoring_hand[i]:is_suit('Hearts', true) then
+                if context.scoring_hand[i].ability.name == 'Wild Card' or context.scoring_hand[i]:is_suit('Diamonds', true) or context.scoring_hand[i]:is_suit('Clubs', true) then
                     cardcount = cardcount + 1
                 end
             end
@@ -599,6 +599,61 @@ SMODS.Joker {
             return {
                 mult = card.ability.extra.mult
             }
+        end
+    end
+}
+
+--Chevreuse
+SMODS.Joker {
+    key = 'j_chevreuse',
+    loc_txt = {
+        name = "Drop your weapons!",
+        text = {
+            "{X:mult,C:white} X#1# {} Mult if {C:attention}scoring hand{} contains ",
+            "only {C:hearts}Heart{} and {C:spades}Spade{} cards, and ",
+            "contains at least one of each"
+        }
+    },
+
+    rarity = 2,
+    atlas = 'Joker',
+    pos = { x = 0, y = 3 },
+    cost = 5,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    allow_duplicates = false,
+
+    config = { extra = { Xmult = 3 } },
+    loc_vars = function(self, info_queue, card)
+        return { vars = { card.ability.extra.Xmult } }
+    end,
+
+    calculate = function(self, card, context)
+
+        if context.joker_main and (to_big(card.ability.extra.mult) > to_big(0)) then
+            local hearts = 0
+            local spades = 0
+            local wilds = 0
+            local wrong = 0
+            for i = 1, #context.scoring_hand do
+                if context.scoring_hand[i].ability.name == 'Wild Card' then
+                    wilds = wilds + 1
+                elseif context.scoring_hand[i]:is_suit('Spades', true) then
+                    spades = 1
+                elseif context.scoring_hand[i]:is_suit('Hearts', true) then
+                    hearts = 1
+                elseif context.scoring_hand[i]:is_suit('Clubs', true) or context.scoring_hand[i]:is_suit('Diamonds', true) then
+                    wrong = 1
+                end
+            end
+
+            if hearts + spades + wilds >= 2 and wrong == 0 then
+                return {
+                    Xmult = card.ability.extra.Xmult
+                }
+            end
         end
     end
 }
@@ -917,7 +972,7 @@ SMODS.Joker {
 
     config = { extra = { Xmult_mod = 0.25, Xmult = 1 } },
     loc_vars = function(self, info_queue, card)
-        return { vars = { card.ability.extra.Xmult_mod } }
+        return { vars = { card.ability.extra.Xmult_mod, card.ability.extra.Xmult } }
     end,
 
     calculate = function(self, card, context)
@@ -1130,17 +1185,101 @@ SMODS.Joker {
     end
 }
 
---Chevreuse
--- does something if you hand only contains the suits that effie doesn't buff
+--Mualani
+SMODS.Joker {
+    key = 'j_Mualani',
+    loc_txt = {
+        name = "Catch an epic wave!",
+        text = {
+            "{C:green}#1# in #2#{} chance to crit",
+            "for {X:mult,C:white} X#3# {} Mult"
+        }
+    },
+
+    rarity = 2,
+    atlas = 'Joker',
+    pos = { x = 2, y = 3 },
+    cost = 6,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    allow_duplicates = false,
+
+    config = { extra = { odds = 2, Xmult = 4 } },
+    loc_vars = function(self, info_queue, card)
+        return { vars = {''..(G.GAME and G.GAME.probabilities.normal or 1), card.ability.extra.odds, card.ability.extra.Xmult} }
+    end,
+
+    calculate = function(self, card, context)
+
+        if context.joker_main and pseudorandom('bloodstone') < G.GAME.probabilities.normal/card.ability.extra.odds then
+            return {
+                Xmult = card.ability.extra.Xmult,
+                card = card
+            }
+        end
+    end
+}
+
+--Cerydra
+SMODS.Joker {
+    key = 'j_cerydra',
+    loc_txt = {
+        name = "Your downfall is absolute!",
+        text = {
+            "Retrigger every {C:attention}fourth{}",
+            "scored card 2 times",
+            "{C:inactive}#1# remaining{}"
+        }
+    },
+
+    rarity = 1,
+    atlas = 'Joker',
+    pos = { x = 1, y = 3 },
+    cost = 5,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    allow_duplicates = false,
+
+    config = { extra = { cards_left = 4, retrigger_req = 4 } },
+    loc_vars = function(self, info_queue, card)
+        return { vars = { card.ability.extra.cards_left } }
+    end,
+
+    calculate = function(self, card, context)
+        if context.repetition and context.cardarea == G.play then
+            card.ability.extra.cards_left = card.ability.extra.cards_left - 1
+            if card.ability.extra.cards_left <= 0 then
+                card.ability.extra.cards_left = card.ability.extra.retrigger_req
+                return {
+                    message = localize("k_again_ex"),
+                    repetitions = 2,
+                    card = card,
+                }
+            end
+        end
+    end
+}
+
 
 --Evernight
 --Creates an Evey every round
-
 --Evey/consumable
---Sell/use this card to reduce the blind requirement and lose money
+--Sell/use this card to give single-use scoring? idk how it'd work just yet
 
 --anemo
 --on first hand, convert all cards to the same suit as the first card
 
---???
---gains stats for every time a card changes suit?
+--? (someone like ororon of fischl who activates on elemental reactions, Ifa Ororon could be fun)
+--gains stats for every time a card changes suit
+
+--Mavuika
+--Gives more chips/mult depending on how many different poker hands / highets poker hand played this run
+--New CDCDC2F poker hand unlocked??????
+
+--Character with frontloaded damage
+--Mult on first hand of round? idk maybe a little uninteresting
+
