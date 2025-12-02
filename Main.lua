@@ -487,7 +487,6 @@ SMODS.Joker {
             "Randomly creates a {C:attention}Suit changing{}",
             "{C:attention}Tarot{} or {C:attention}The lovers{} if played hand",
             "contains at least {C:attention}4 scoring{} cards.",
-            "Max twice per round",
             "{C:inactive}(Must have room){}"
         }
     },
@@ -502,22 +501,15 @@ SMODS.Joker {
     discovered = true,
     allow_duplicates = false,
 
-    config = { extra = { limit = 2, made = 0, blueprint_buffer = false } },
-    loc_vars = function(self, info_queue, card)
-        return { vars = { card.ability.extra.limit, card.ability.extra.made, card.ability.extra.blueprint_buffer } }
-    end,
-
     calculate = function(self, card, context)
         if context.before and #context.scoring_hand >= 4
-            and #G.consumeables.cards + G.GAME.consumeable_buffer < G.consumeables.config.card_limit
-            and (card.ability.extra.made < card.ability.extra.limit
-                or (card.ability.extra.blueprint_buffer and context.blueprint)) then
+            and #G.consumeables.cards + G.GAME.consumeable_buffer < G.consumeables.config.card_limit then
             G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + 1
             G.E_MANAGER:add_event(Event({
                 func = (function()
                     G.E_MANAGER:add_event(Event({
                         func = function()
-                            local card = create_card('Suiter', G.consumeables, nil, nil, nil, nil, nil, 'kaveh')
+                            local card = create_card('Suiter', G.consumeables, nil, nil, nil, nil, nil, 'jahoda')
                             card:add_to_deck()
                             G.consumeables:emplace(card)
                             G.GAME.consumeable_buffer = 0
@@ -529,18 +521,6 @@ SMODS.Joker {
                     return true
                 end)
             }))
-
-            if not context.blueprint then
-                card.ability.extra.made = card.ability.extra.made + 1
-                card.ability.extra.blueprint_buffer = true
-            end
-        end
-        if context.after then
-            card.ability.extra.blueprint_buffer = false
-        end
-
-        if context.end_of_round then
-            card.ability.extra.made = 0
         end
     end
 }
@@ -631,7 +611,6 @@ SMODS.Joker {
     end,
 
     calculate = function(self, card, context)
-
         if context.joker_main and (to_big(card.ability.extra.mult) > to_big(0)) then
             local hearts = 0
             local spades = 0
@@ -1208,12 +1187,11 @@ SMODS.Joker {
 
     config = { extra = { odds = 2, Xmult = 4 } },
     loc_vars = function(self, info_queue, card)
-        return { vars = {''..(G.GAME and G.GAME.probabilities.normal or 1), card.ability.extra.odds, card.ability.extra.Xmult} }
+        return { vars = { '' .. (G.GAME and G.GAME.probabilities.normal or 1), card.ability.extra.odds, card.ability.extra.Xmult } }
     end,
 
     calculate = function(self, card, context)
-
-        if context.joker_main and pseudorandom('bloodstone') < G.GAME.probabilities.normal/card.ability.extra.odds then
+        if context.joker_main and pseudorandom('bloodstone') < G.GAME.probabilities.normal / card.ability.extra.odds then
             return {
                 Xmult = card.ability.extra.Xmult,
                 card = card
@@ -1229,7 +1207,7 @@ SMODS.Joker {
         name = "Your downfall is absolute!",
         text = {
             "Retrigger every {C:attention}fourth{}",
-            "scored card 2 times",
+            "scored card {C:attention}2{} times",
             "{C:inactive}#1# remaining{}"
         }
     },
@@ -1282,4 +1260,3 @@ SMODS.Joker {
 
 --Character with frontloaded damage
 --Mult on first hand of round? idk maybe a little uninteresting
-
