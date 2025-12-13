@@ -295,7 +295,7 @@ SMODS.Joker {
                         suitcount = suitcount + 1
                     end
                 elseif context.scoring_hand[i]:is_suit('Diamonds', true) then
-                    if suits["Diamond"] == 0 then
+                    if suits["Diamonds"] == 0 then
                         suits["Diamonds"] = suits["Diamonds"] + 1
                         suitcount = suitcount + 1
                     end
@@ -531,9 +531,9 @@ SMODS.Joker {
     loc_txt = {
         name = "Goose on the loose!",
         text = {
-            "If {C:attention}poker hand{} contains 1/2/3/4/5",
+            "If {C:attention}poker hand{} contains 2/3/4/5",
             "{C:diamonds}Diamond{} or {C:clubs}Club{} cards, this joker",
-            "gains {C:mult}+#1#{}/{C:mult}+#1#{}/{C:mult}+#2#{}/{C:mult}+#2#{}/{C:mult}+#3#{} Mult",
+            "gains {C:mult}+#1#{}/{C:mult}+#2#{}/{C:mult}+#2#{}/{C:mult}+#3#{} Mult",
             "{C:inactive}[currently {C:mult}+#4#{} {C:inactive}Mult]"
         }
     },
@@ -562,7 +562,7 @@ SMODS.Joker {
                 end
             end
 
-            if cardcount == 1 or cardcount == 2 then
+            if cardcount == 2 then
                 card.ability.extra.mult = card.ability.extra.mult + card.ability.extra.extra_mult_1
             elseif cardcount == 3 or cardcount == 4 then
                 card.ability.extra.mult = card.ability.extra.mult + card.ability.extra.extra_mult_2
@@ -611,7 +611,7 @@ SMODS.Joker {
     end,
 
     calculate = function(self, card, context)
-        if context.joker_main and (to_big(card.ability.extra.mult) > to_big(0)) then
+        if context.joker_main then
             local hearts = 0
             local spades = 0
             local wilds = 0
@@ -1128,12 +1128,16 @@ SMODS.Joker {
 
     calculate = function(self, card, context)
         if context.before and not context.blueprint then
+            local upgraded = false;
             for i = 1, #context.scoring_hand do
                 if context.scoring_hand[i]:is_suit(G.GAME.current_round.asta_suit, true) or context.scoring_hand[i].ability.name == "Wild Card" then
                     card.ability.extra.mult = card.ability.extra.mult + card.ability.extra.extra_mult;
+                    upgraded = true
                 end
             end
-            card_eval_status_text(card, "extra", nil, nil, nil, { message = localize('k_upgrade_ex') })
+            if upgraded then
+                card_eval_status_text(card, "extra", nil, nil, nil, { message = localize('k_upgrade_ex') })
+            end
         end
 
         if context.joker_main and card.ability.extra.mult > 0 then
