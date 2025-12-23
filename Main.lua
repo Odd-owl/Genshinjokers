@@ -682,7 +682,7 @@ SMODS.Joker {
             }
         end
 
-        if context.end_of_round then
+        if context.end_of_round and context.cardarea == G.jokers then
             card.ability.extra.Xmult = 1
         end
     end
@@ -813,7 +813,7 @@ SMODS.Joker {
             }
         end
 
-        if context.end_of_round then
+        if context.end_of_round and context.cardarea == G.jokers then
             card.ability.extra.cost = card.ability.extra.base_cost
         end
     end
@@ -1238,6 +1238,170 @@ SMODS.Joker {
                     repetitions = 2,
                     card = card,
                 }
+            end
+        end
+    end
+}
+
+--Phainon
+SMODS.Joker {
+    key = 'j_phainon',
+    loc_txt = {
+        name = "Khaslana",
+        text = {
+            "When in the first joker slot",
+            "during a blind, {C:attention}debuffs{} all other",
+            "jokers and gives {X:mult,C:white} X#2# {} Mult",
+            "per joker debuffed in this way.",
+            "{C:inactive}(Currently {X:mult,C:white} X#1# {} {C:inactive}Mult){}"
+        }
+    },
+
+    rarity = 4,
+    atlas = 'Joker',
+    pos = { x = 3, y = 3 },
+    cost = 20,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    allow_duplicates = false,
+
+    config = { extra = { Xmult = 1, Xmult_mod = 3, activated = false, in_blind = false } },
+    loc_vars = function(self, info_queue, card)
+        return { vars = { card.ability.extra.Xmult, card.ability.extra.Xmult_mod } }
+    end,
+	update = function(self, card, front)
+		if G.STAGE == G.STAGES.RUN and card.ability.extra.in_blind == true then
+            if G.jokers.cards[1] == card then
+                if card.ability.extra.activated == false then
+                    card.ability.extra.activated = true
+                    card.ability.extra.Xmult = (#G.jokers.cards - 1) * card.ability.extra.Xmult_mod + 1
+                    card.children.center:set_sprite_pos{ x = 4, y = 3 }
+                    card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize('k_disabled_ex'),colour = G.C.FILTER, delay = 0.45})
+                    for i = 2, #G.jokers.cards do
+                        G.jokers.cards[i]:set_debuff(true)
+                        G.jokers.cards[i]:juice_up()
+                    end
+                end
+			else
+                card.ability.extra.activated = false
+                for i = 1, #G.jokers.cards do
+                    G.jokers.cards[i]:set_debuff(false)
+				end
+                card.children.center:set_sprite_pos{ x = 3, y = 3 }
+                card.ability.extra.Xmult = 1
+            end
+		end
+	end,
+
+    calculate = function(self, card, context)
+        if context.setting_blind then
+            card.ability.extra.in_blind = true
+            if G.jokers.cards[1] == card then
+                card.ability.extra.activated = true
+                for i = 2, #G.jokers.cards do
+                    G.jokers.cards[i]:set_debuff(true)
+                    G.jokers.cards[i]:juice_up()
+                end
+                card.ability.extra.Xmult = (#G.jokers.cards - 1) * card.ability.extra.Xmult_mod + 1
+                card.children.center:set_sprite_pos{ x = 4, y = 3 }
+                card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize('k_disabled_ex'),colour = G.C.FILTER, delay = 0.45})
+			end
+        end
+
+
+
+        if context.end_of_round and context.cardarea == G.jokers then
+            card.ability.extra.in_blind = false
+            for i = 1, #G.jokers.cards do
+                G.jokers.cards[i]:set_debuff(false)
+            end
+            card.ability.extra.activated = false
+            card.children.center:set_sprite_pos{ x = 3, y = 3 }
+            card.ability.extra.Xmult = 1
+            card_eval_status_text(card, 'extra', nil, nil, nil, {message = "end" ,colour = G.C.FILTER, delay = 0.45})
+        end
+
+        if context.joker_main and G.jokers.cards[1] == card then
+            return {
+                x_mult = card.ability.extra.Xmult
+            }
+        end
+    end
+}
+
+--Columbina
+SMODS.Joker {
+    key = 'j_columbina',
+    loc_txt = {
+        name = "Columbina Hyposelenia",
+        text = {
+            "When entering a {C:attention}Small{} or {C:attention}Big Blind{},",
+            "upgrades every {C:legendary,E:1}poker hand by {C:attention}1{} level.",
+            "When entering a {C:attention}Boss Blind{}, upgrades",
+            "most played hand by {C:attention}1{} level"
+        }
+    },
+
+    rarity = 4,
+    atlas = 'Joker',
+    pos = { x = 5, y = 3 },
+    cost = 20,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    allow_duplicates = false,
+
+    calculate = function(self, card, context)
+
+        if context.setting_blind and not context.blind.boss then
+            update_hand_text({sound = 'button', volume = 0.7, pitch = 0.8, delay = 0.3}, {handname=localize('k_all_hands'),chips = '...', mult = '...', level=''})
+            G.E_MANAGER:add_event(Event({trigger = 'after', delay = 0.2, func = function()
+                play_sound('tarot1')
+                card:juice_up(0.8, 0.5)
+                G.TAROT_INTERRUPT_PULSE = true
+                return true end }))
+            update_hand_text({delay = 0}, {mult = '+', StatusText = true})
+            G.E_MANAGER:add_event(Event({trigger = 'after', delay = 0.9, func = function()
+                play_sound('tarot1')
+                card:juice_up(0.8, 0.5)
+                return true end }))
+            update_hand_text({delay = 0}, {chips = '+', StatusText = true})
+            G.E_MANAGER:add_event(Event({trigger = 'after', delay = 0.9, func = function()
+                play_sound('tarot1')
+                card:juice_up(0.8, 0.5)
+                G.TAROT_INTERRUPT_PULSE = nil
+                return true end }))
+            update_hand_text({sound = 'button', volume = 0.7, pitch = 0.9, delay = 0}, {level='+1'})
+            delay(1.3)
+            for k, v in pairs(G.GAME.hands) do
+                level_up_hand(context.blueprint_card or card, k, true)
+            end
+            update_hand_text({sound = 'button', volume = 0.7, pitch = 1.1, delay = 0}, {mult = 0, chips = 0, handname = '', level = ''})
+        end
+
+        if context.setting_blind and context.blind.boss then
+            local _hand, _tally = nil, 0
+            for _, handname in ipairs(G.handlist) do
+                if SMODS.is_poker_hand_visible(handname) and G.GAME.hands[handname].played > _tally then
+                    _hand = handname
+                    _tally = G.GAME.hands[handname].played
+                end
+            end
+            if _hand then
+                update_hand_text({ sound = "button", volume = 0.7, pitch = 0.8, delay = 0.3 }, {
+                    handname = localize(_hand, "poker_hands"),
+                    chips = G.GAME.hands[_hand].chips,
+                    mult = G.GAME.hands[_hand].mult,
+                    level = G.GAME.hands[_hand].level,
+                })
+		    	level_up_hand(context.blueprint_card or card, _hand, false, 1)
+                update_hand_text(
+			    { sound = "button", volume = 0.7, pitch = 1.1, delay = 0 },
+			    { mult = 0, chips = 0, handname = "", level = "" }
+		        )
             end
         end
     end
