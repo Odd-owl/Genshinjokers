@@ -808,6 +808,63 @@ SMODS.Joker {
     end
 }
 
+--Freminet
+SMODS.Joker {
+    key = 'j_freminet',
+    loc_txt = {
+        name = "Pers!",
+        text = {
+            "{C:chips}+#1#{} chips and {C:mult}+#2#{} Mult.",
+            "{C:chips}-#3#{} chips and {C:mult}+#4#{} mult after every",
+            "hand played, resets each round",
+        }
+    },
+
+    rarity = 1,
+    atlas = 'placeholder',
+    pos = { x = 0, y = 0 },
+    cost = 4,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    allow_duplicates = false,
+
+    config = { extra = { chips = 80, mult = 0, chips_loss = 20, mult_gain = 3, init_chips = 80 } },
+    loc_vars = function(self, info_queue, card)
+        return { vars = { card.ability.extra.chips, card.ability.extra.mult, card.ability.extra.chips_loss, card.ability.extra.mult_gain} }
+    end,
+
+    calculate = function(self, card, context)
+        if context.after and not context.blueprint then
+            card.ability.extra.chips = card.ability.extra.chips - card.ability.extra.chips_loss
+            if card.ability.extra.chips < 0 then
+                card.ability.extra.chips = 0
+            end
+            card.ability.extra.mult = card.ability.extra.mult + card.ability.extra.mult_gain
+            card_eval_status_text(card, 'extra', nil, nil, nil,
+                { message = "pressure up!" })
+        end
+
+        if context.end_of_round and context.cardarea == G.jokers and not context.blueprint then
+            card.ability.extra.chips = card.ability.extra.init_chips
+            card.ability.extra.mult = 0
+            return {
+                message = localize('k_reset'),
+                colour = G.C.RED
+            }
+        end
+
+        if context.joker_main then
+            return {
+                chips = card.ability.extra.chips,
+                mult = card.ability.extra.mult,
+                card = card
+            }
+        end
+    end
+}
+
 --Durin
 SMODS.Joker {
     key = 'j_durin',
@@ -897,6 +954,68 @@ SMODS.Joker {
 
         if context.end_of_round and context.cardarea == G.jokers then
             card.ability.extra.cost = card.ability.extra.base_cost
+        end
+    end
+}
+
+--Iansas
+SMODS.Joker {
+    key = 'j_iansan',
+    loc_txt = {
+        name = "Start the clock!",
+        text = {
+            "Gains {X:mult,C:white} X#1# {} Mult if played {C:attention}poker hand{}",
+            "is different from the last played hand.",
+            "Resets when {C:attention}Boss Blind{} is defeated, or",
+            "when playing the same hand twice is a row",
+            "{C:inactive}(currently {}{X:mult,C:white} X#2# {} {C:inactive}Mult){}",
+            "{C:inactive}last played hand: {}{C:attention}#3#{}",
+        }
+    },
+
+    rarity = 2,
+    atlas = 'placeholder',
+    pos = { x = 0, y = 0 },
+    cost = 7,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    allow_duplicates = false,
+
+    config = { extra = { Xmult_mod = 0.25, Xmult = 1 } },
+    loc_vars = function(self, info_queue, card)
+        return { vars = { card.ability.extra.Xmult_mod, card.ability.extra.Xmult, G.GAME.last_hand_played } }
+    end,
+
+    calculate = function(self, card, context)
+        if context.before and not context.blueprint then
+            if G.GAME.last_hand_played == context.scoring_name then
+                card.ability.extra.Xmult = 1
+                return {
+                    message = localize('k_reset'),
+                    colour = G.C.RED
+                }
+            else
+                card.ability.extra.Xmult = card.ability.extra.Xmult + card.ability.extra.Xmult_mod
+                card_eval_status_text(card, 'extra', nil, nil, nil,
+                    { message = localize { type = 'variable', key = 'a_xmult', vars = { card.ability.extra.Xmult } } })
+            end
+        end
+
+        if context.joker_main and card.ability.extra.Xmult > 1 then
+            return {
+                Xmult = card.ability.extra.Xmult,
+                card = card
+            }
+        end
+
+        if context.beat_boss and context.cardarea == G.jokers  and card.ability.extra.Xmult > 1 then
+            card.ability.extra.Xmult = 1
+            return {
+                message = localize('k_reset'),
+                colour = G.C.RED
+            }
         end
     end
 }
