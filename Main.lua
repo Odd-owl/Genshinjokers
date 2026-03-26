@@ -571,7 +571,7 @@ SMODS.Joker {
         name = "Time for takeoff!",
         text = {
             "During {C:attention}first hand{} of the round,",
-            "convert all {C:attention}scoring cards{} to",
+            "convert {C:attention}all cards{} to",
             "the suit of the {C:attention}first scoring card{}"
         }
     },
@@ -593,7 +593,7 @@ SMODS.Joker {
         end
         if context.before and G.GAME.current_round.hands_played == 0 then
             local suit = context.scoring_hand[1].base.suit
-            for k, v in ipairs(context.scoring_hand) do
+            for k, v in ipairs(context.full_hand) do
                 G.E_MANAGER:add_event(Event({
                     func = function()
                         SMODS.change_base(v, suit)
@@ -1302,7 +1302,7 @@ SMODS.Joker {
     end
 }
 
---Aventuine
+--Aventurine
 SMODS.Joker {
     key = 'j_Aventurine',
     loc_txt = {
