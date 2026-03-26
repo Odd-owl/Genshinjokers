@@ -825,8 +825,8 @@ SMODS.Joker {
     },
 
     rarity = 1,
-    atlas = 'placeholder',
-    pos = { x = 0, y = 0 },
+    atlas = 'Joker',
+    pos = { x = 1, y = 4 },
     cost = 4,
     blueprint_compat = true,
     eternal_compat = true,
@@ -834,7 +834,7 @@ SMODS.Joker {
     discovered = true,
     allow_duplicates = false,
 
-    config = { extra = { chips = 80, mult = 0, chips_loss = 20, mult_gain = 3, init_chips = 80 } },
+    config = { extra = { chips = 60, mult = 0, chips_loss = 15, mult_gain = 4, init_chips = 80 } },
     loc_vars = function(self, info_queue, card)
         return { vars = { card.ability.extra.chips, card.ability.extra.mult, card.ability.extra.chips_loss, card.ability.extra.mult_gain} }
     end,
@@ -990,8 +990,8 @@ SMODS.Joker {
     },
 
     rarity = 2,
-    atlas = 'placeholder',
-    pos = { x = 0, y = 0 },
+    atlas = 'Joker',
+    pos = { x = 0, y = 4 },
     cost = 7,
     blueprint_compat = true,
     eternal_compat = true,
@@ -1599,7 +1599,7 @@ SMODS.Joker {
 SMODS.Joker {
     key = 'j_sparxie',
     loc_txt = {
-        name = "Sparxicle going live!",
+        name = "Party till the end of the word!",
         text = {
             "When {C:chips}hand{}/{C:mult}discard{} has only {C:attention}one card{},",
             "gain {X:mult,C:white} X#1# {} Mult for this round.",
