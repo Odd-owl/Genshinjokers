@@ -540,6 +540,10 @@ SMODS.Joker {
     discovered = true,
     allow_duplicates = false,
 
+    loc_vars = function(self, info_queue, card)
+        info_queue[#info_queue + 1] = G.P_CENTERS.c_lovers
+    end,
+
     calculate = function(self, card, context)
         if context.before and #context.scoring_hand >= 4
             and #G.consumeables.cards + G.GAME.consumeable_buffer < G.consumeables.config.card_limit then
@@ -974,7 +978,54 @@ SMODS.Joker {
     end
 }
 
---Iansas
+--Varesa
+SMODS.Joker {
+    key = 'varesa',
+    loc_txt = {
+        name = "Volcano kablam!",
+        text = {
+            "Cycles between {X:mult,C:white} X#1# {}, {X:mult,C:white} X#2# {}",
+            "and {X:mult,C:white} X#3# {} every hand.",
+            "{C:inactive}(currently {}{X:mult,C:white} X#4# {} {C:inactive}Mult){}"
+        }
+    },
+
+    rarity = 3,
+    atlas = 'Joker',
+    pos = { x = 6, y = 4 },
+    cost = 7,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    allow_duplicates = false,
+
+    config = { extra = { Xmult_1 = 1.5, Xmult_2 = 2, Xmult_3 = 3, Xmult = 1.5 } },
+    loc_vars = function(self, info_queue, card)
+        return { vars = { card.ability.extra.Xmult_1, card.ability.extra.Xmult_2, card.ability.extra.Xmult_3, card.ability.extra.Xmult } }
+    end,
+
+    calculate = function(self, card, context)
+        if context.joker_main then
+            return {
+                Xmult = card.ability.extra.Xmult,
+                card = card
+            }
+        end
+
+        if context.after and not context.blueprint then
+            if card.ability.extra.Xmult == card.ability.extra.Xmult_1 then
+                card.ability.extra.Xmult = card.ability.extra.Xmult_2
+            elseif card.ability.extra.Xmult == card.ability.extra.Xmult_2 then
+                card.ability.extra.Xmult = card.ability.extra.Xmult_3
+            elseif card.ability.extra.Xmult == card.ability.extra.Xmult_3 then
+                card.ability.extra.Xmult = card.ability.extra.Xmult_1
+            end
+        end
+    end
+}
+
+--Iansan
 SMODS.Joker {
     key = 'iansan',
     loc_txt = {
@@ -1141,11 +1192,6 @@ SMODS.Joker {
             }
         end
 
-        -- if context.joker_main and G.jokers.cards[#G.jokers.cards] ~= card and not context.blueprint then
-        --     card.ability.extra.Xmult = card.ability.extra.Xmult + card.ability.extra.Xmult_mod
-        --     card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize{type = 'variable', key = 'a_xmult', vars = {card.ability.extra.Xmult}}})
-        -- end
-
         if context.after and card.ability.extra.used then
             card.ability.extra.Xmult = 1
             card.ability.extra.used = false
@@ -1178,6 +1224,7 @@ SMODS.Joker {
 
     config = { extra = { Xmult_mod = 0.75, Xmult = 1 } },
     loc_vars = function(self, info_queue, card)
+        info_queue[#info_queue + 1] = G.P_CENTERS.m_stone
         return { vars = { card.ability.extra.Xmult_mod, card.ability.extra.Xmult } }
     end,
 
@@ -1227,6 +1274,10 @@ SMODS.Joker {
     unlocked = true,
     discovered = true,
     allow_duplicates = false,
+
+    loc_vars = function(self, info_queue, card)
+        info_queue[#info_queue + 1] = G.P_CENTERS.m_stone
+    end,
 
     calculate = function(self, card, context)
         if context.press_play and #G.hand.highlighted < 5 then
@@ -1281,6 +1332,9 @@ SMODS.Joker {
     allow_duplicates = false,
 
     config = { extra = { retrigger = -1 } },
+    loc_vars = function(self, info_queue, card)
+        info_queue[#info_queue + 1] = G.P_CENTERS.m_stone
+    end,
 
     calculate = function(self, card, context)
         if context.repetition and context.cardarea == G.play then
@@ -1539,6 +1593,48 @@ SMODS.Joker {
     end
 }
 
+--Boothill
+SMODS.Joker {
+    key = 'boothill',
+    loc_txt = {
+        name = "Bring it on!",
+        text = {
+            "{X:mult,C:white} X#1# {} Mult.",
+            "playing hands costs an",
+            "additional 1 {C:blue}hand{}"
+        }
+    },
+
+    rarity = 2,
+    atlas = 'Joker',
+    pos = { x = 5, y = 4 },
+    cost = 6,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    allow_duplicates = false,
+
+    config = { extra = { Xmult = 5 } },
+    loc_vars = function(self, info_queue, card)
+        return { vars = { card.ability.extra.Xmult } }
+    end,
+
+    calculate = function (self, card, context)
+        if context.before then
+            ease_hands_played(-1)
+        end
+
+        if context.joker_main then
+            return {
+                Xmult = card.ability.extra.Xmult,
+                card = card
+            }
+        end
+    end
+
+}
+
 --Cerydra
 SMODS.Joker {
     key = 'cerydra',
@@ -1584,6 +1680,60 @@ SMODS.Joker {
     end
 }
 
+--Sparkle
+SMODS.Joker {
+    key = 'sparkle',
+    loc_txt = {
+        name = "A thousand faces in a thousand places!",
+        text = {
+            "After defeating a {C:attention}Boss blind{}, generate",
+            "2 copies of {C:tarot}The Fool{}"
+        }
+    },
+
+    rarity = 2,
+    atlas = 'Joker',
+    pos = { x = 7, y = 4 },
+    cost = 6,
+    blueprint_compat = false,
+    eternal_compat = false,
+    unlocked = true,
+    discovered = true,
+    allow_duplicates = false,
+
+    config = { extra = { first_hand = false, second_hand = false, third_hand = false } },
+    loc_vars = function(self, info_queue, card)
+        info_queue[#info_queue + 1] = G.P_CENTERS.c_fool
+    end,
+
+    calculate = function (self, card, context)
+        if context.end_of_round and context.game_over == false and context.main_eval and context.beat_boss then
+            for i=1, 2 do
+                if #G.consumeables.cards + G.GAME.consumeable_buffer < G.consumeables.config.card_limit then
+                    G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + 1
+                    G.E_MANAGER:add_event(Event({
+                        func = (function()
+                            G.E_MANAGER:add_event(Event({
+                                func = function()
+                                    SMODS.add_card {
+                                        key = "c_fool"
+                                    }
+                                    G.GAME.consumeable_buffer = 0
+                                    return true
+                                end
+                            }))
+                            card_eval_status_text(card, 'extra', nil, nil, nil,
+                                { message = "Fool!", colour =  G.C.SECONDARY_SET.Tarot })
+                            return true
+                        end)
+                    }))
+                end
+            end
+        end
+    end
+
+}
+
 --Albedo
 SMODS.Joker {
     key = 'albedo',
@@ -1611,6 +1761,8 @@ SMODS.Joker {
 
     config = { extra = { first_hand = false, second_hand = false, third_hand = false } },
     loc_vars = function(self, info_queue, card)
+        info_queue[#info_queue + 1] = G.P_CENTERS.c_soul
+        info_queue[#info_queue + 1] = G.P_CENTERS.c_judgement
         return { vars = { (card.ability.extra.first_hand and "[X]" or "[ ]"), (card.ability.extra.second_hand and "[X]" or "[ ]"), (card.ability.extra.third_hand and "[X]" or "[ ]") } }
     end,
 
@@ -1689,7 +1841,7 @@ SMODS.Joker {
 
     rarity = 2,
     atlas = 'Joker',
-    pos = { x = 3, y = 4 },
+    pos = { x = 4, y = 4 },
     cost = 10,
     blueprint_compat = false,
     eternal_compat = true,
@@ -1902,10 +2054,10 @@ SMODS.Joker {
     loc_txt = {
         name = "Khaslana",
         text = {
-            "When in the first joker slot",
-            "during a blind, {C:attention}debuffs{} all other",
-            "jokers and gives {X:mult,C:white} X#2# {} Mult times",
-            "the current {C:attention}Ante{} per other joker",
+            "When in the first joker slot during",
+            "a blind, {C:attention}debuffs{} all other jokers",
+            "and gives ({X:mult,C:white} X#2# {} Mult times current {C:attention}Ante{})",
+            "per debuffed joker",
             "{C:inactive}(Currently {X:mult,C:white} X#1# {} {C:inactive}Mult){}"
         }
     },
@@ -2093,6 +2245,10 @@ SMODS.Joker {
     unlocked = true,
     discovered = true,
     allow_duplicates = false,
+
+    loc_vars = function(self, info_queue, card)
+        info_queue[#info_queue + 1] = G.P_CENTERS.e_negative
+    end,
 
     calculate = function(self, card, context)
         if context.setting_blind then
