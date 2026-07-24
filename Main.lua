@@ -1624,7 +1624,7 @@ SMODS.Joker {
         return { vars = { card.ability.extra.Xmult } }
     end,
 
-    calculate = function (self, card, context)
+    calculate = function(self, card, context)
         if context.before then
             ease_hands_played(-1)
         end
@@ -1710,7 +1710,7 @@ SMODS.Joker {
         info_queue[#info_queue + 1] = G.P_CENTERS.c_fool
     end,
 
-    calculate = function (self, card, context)
+    calculate = function(self, card, context)
         if context.end_of_round and context.game_over == false and context.main_eval and context.beat_boss then
             for i=1, 2 do
                 if #G.consumeables.cards + G.GAME.consumeable_buffer < G.consumeables.config.card_limit then
@@ -1770,7 +1770,7 @@ SMODS.Joker {
         return { vars = { (card.ability.extra.first_hand and "[X]" or "[ ]"), (card.ability.extra.second_hand and "[X]" or "[ ]"), (card.ability.extra.third_hand and "[X]" or "[ ]") } }
     end,
 
-    calculate = function (self, card, context)
+    calculate = function(self, card, context)
         if context.before then
             if context.scoring_name == "Flush" then
                 card.ability.extra.first_hand = true
@@ -1857,7 +1857,7 @@ SMODS.Joker {
         G.E_MANAGER:add_event(Event({
             func = function()
                 for _, other_card in pairs(G.I.CARD) do
-                    if other_card.set_cost then other_card:set_cost() end
+                    if other_card.set_cost then other_card:set_cost_value() end
                 end
                 return true
             end
@@ -1867,7 +1867,7 @@ SMODS.Joker {
         G.E_MANAGER:add_event(Event({
             func = function()
                 for _, other_card in pairs(G.I.CARD) do
-                    if other_card.set_cost then other_card:set_cost() end
+                    if other_card.set_cost then other_card:set_cost_value() end
                 end
                 return true
             end
@@ -1875,9 +1875,9 @@ SMODS.Joker {
     end,
 }
 
-local card_set_cost_ref = Card.set_cost
+local card_set_cost_value_ref = Card.set_cost_value
 function Card:set_cost_value(...)
-    local ret = card_set_cost_ref(self, ...)
+    local ret = card_set_cost_value_ref(self, ...)
     if next(SMODS.find_card("j_GI_yao_guang")) then
         if (self.ability.set == 'Tarot' or (self.ability.set == 'Booster' and self.config.center.kind == 'Arcana')) then self.cost = 0 end
     end
@@ -2006,7 +2006,7 @@ SMODS.Joker {
         return { vars = { card.ability.extra.Xmult_mod_low, card.ability.extra.Xmult_mod_high, card.ability.extra.Xmult, card.ability.extra.odds } }
     end,
 
-    calculate = function (self, card, context)
+    calculate = function(self, card, context)
 
         if (context.discard or context.before) and #context.full_hand == 1 and not context.blueprint then
             if pseudorandom('sparxie') < card.ability.extra.odds / 100 then
@@ -2325,7 +2325,3 @@ SMODS.Joker {
 --Mavuika
 --Gives more chips/mult depending on how many different poker hands / highets poker hand played this run
 --New CDCDC2F poker hand unlocked??????
-
---Wolfie
---LOOTBOXES 🤑🤑🤑🤑🤑🤑🤑🤑 I LOVE GAMBLING!!!!!
-
